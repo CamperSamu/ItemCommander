@@ -1,4 +1,34 @@
-# Fabric Example Mod
+# Item Commander
+> Shiny item do stuff
+
+A simple Serverside Fabric mod that allows you to assign commands to Item(Stacks).
+It works by adding NBT data to the item, then when a player uses an item the NBT data for that item is checked, if it contains the `ItemCommander` tag tree it executes the specified command.
+
+To embed a command in an item, hold it in your hand and run `/commander "<command>" [CONSUME_ACTION] [COMMAND_SOURCE]` 
+
+_consume actions:_
+
+| Action      | Description       |
+|-------------|-------------------|
+| **CONSUME** | Consumes the item |
+| KEEP        | Keeps the item    |
+
+_command source:_
+
+| Action      | Description                    |
+|-------------|--------------------------------|
+| **SERVER**  | Command executed by the server |
+| PLAYER      | Command executed by the player |
+
+_defaults in **bold***_
+
+### This mod supports [LuckPerms' Fabric Permission API](https://luckperms.net/).
+- `commander.command.create` allows a player to use this mod to embed commands in items
+
+## Bleeding edge builds
+Upstream builds are available via [GitHub Actions](https://github.com/CamperSamu/ItemCommander/actions).
+
+___
 
 ## Setup
 

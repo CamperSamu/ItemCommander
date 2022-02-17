@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "itemcommander",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Item Commander",
+  "description": "A simple Serverside Fabric mod that allows you to assign commands to Item(Stacks).",
   "authors": [
-    "Me!"
+    "Camper_Samu"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/CamperSamu/CamperSamu",
+    "sources": "https://github.com/CamperSamu/ItemCommander"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/itemcommander/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "com.campersamu.itemcommander.ItemCommanderInit"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "itemcommander.mixins.json"
   ],
 
   "depends": {
@@ -31,8 +31,5 @@
     "fabric": "*",
     "minecraft": "1.18.x",
     "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }
