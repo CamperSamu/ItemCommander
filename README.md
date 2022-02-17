@@ -13,7 +13,7 @@ _consume actions:_
 | **CONSUME** | Consumes the item |
 | KEEP        | Keeps the item    |
 
-_command source:_
+_command sources:_
 
 | Action      | Description                    |
 |-------------|--------------------------------|
