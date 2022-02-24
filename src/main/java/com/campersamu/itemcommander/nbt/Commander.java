@@ -3,10 +3,18 @@ package com.campersamu.itemcommander.nbt;
 import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.exception.CommanderNoCommandException;
 import com.campersamu.itemcommander.exception.CommanderNoTagException;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+
+import static com.campersamu.itemcommander.nbt.CommanderAction.CONSUME;
+import static com.campersamu.itemcommander.nbt.CommanderSource.PLAYER;
+import static com.campersamu.itemcommander.nbt.CommanderSource.SERVER;
 
 public record Commander(String command, CommanderAction action, CommanderSource source) {
     public static final String COMMANDER_TAG_KEY = "ItemCommander";
@@ -25,9 +33,9 @@ public record Commander(String command, CommanderAction action, CommanderSource 
                     if (nbt.contains(COMMANDER_SOURCE_KEY, NbtElement.BYTE_TYPE)) {
                         return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)));
                     }
-                    return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.SERVER);
+                    return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), SERVER);
                 }
-                return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CommanderAction.CONSUME, CommanderSource.SERVER);
+                return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CONSUME, SERVER);
             }
             throw CommanderNoCommandException;
         }
@@ -44,7 +52,29 @@ public record Commander(String command, CommanderAction action, CommanderSource 
         return nbt;
     }
 
-    public @NotNull NbtCompound toNbt(){
+    public static ActionResult executeCommand(Commander commander, ServerPlayerEntity player, ItemStack itemStack) {
+        MinecraftServer server = player.server;
+
+        if (commander.source() == SERVER) {
+            String parsedCommand = commander.command().replace("@p", player.getEntityName()).replace("@s", player.getEntityName());
+            server.getCommandManager().execute(server.getCommandSource(), parsedCommand);
+        } else if (commander.source() == PLAYER) {
+            server.getCommandManager().execute(player.getCommandSource(), commander.command());
+        }
+
+        if (commander.action() != CONSUME) {
+            return ActionResult.PASS;
+        } else {
+            itemStack.decrement(1);
+            return ActionResult.CONSUME;
+        }
+    }
+
+    public @NotNull NbtCompound toNbt() {
         return toNbt(this);
+    }
+
+    public ActionResult executeCommand(ServerPlayerEntity player, ItemStack itemStack) {
+        return executeCommand(this, player, itemStack);
     }
 }

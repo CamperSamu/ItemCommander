@@ -27,21 +27,7 @@ public class ItemInteractMixin {
     )
     private void checkInteraction(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         try {
-            Commander commander = Commander.fromNbt(stack.getOrCreateNbt());
-            var server = player.server;
-
-            if (commander.source() == CommanderSource.SERVER)
-                server.getCommandManager().execute(server.getCommandSource(), commander.command());
-            else if(commander.source() == CommanderSource.PLAYER) {
-                server.getCommandManager().execute(player.getCommandSource(), commander.command());
-            }
-
-            if (commander.action() != CommanderAction.CONSUME) {
-                cir.setReturnValue(ActionResult.PASS);
-            } else {
-                stack.decrement(1);
-                cir.setReturnValue(ActionResult.CONSUME);
-            }
+            cir.setReturnValue(Commander.fromNbt(stack.getOrCreateNbt()).executeCommand(player, stack));
         } catch (CommanderException ignored) {}
     }
 }
