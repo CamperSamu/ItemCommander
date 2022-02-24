@@ -56,7 +56,7 @@ public record Commander(String command, CommanderAction action, CommanderSource 
         MinecraftServer server = player.server;
 
         if (commander.source() == SERVER) {
-            String parsedCommand = commander.command().replace("@p", player.getEntityName()).replace("@s", player.getEntityName());
+            final String parsedCommand = commander.command().replace("@p", player.getEntityName()).replace("@s", player.getEntityName());
             server.getCommandManager().execute(server.getCommandSource(), parsedCommand);
         } else if (commander.source() == PLAYER) {
             server.getCommandManager().execute(player.getCommandSource(), commander.command());

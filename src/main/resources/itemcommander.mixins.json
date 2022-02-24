@@ -4,7 +4,8 @@
   "package": "com.campersamu.itemcommander.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ItemInteractMixin"
+    "ItemInteractMixin",
+    "LecternMixin"
   ],
   "injectors": {
     "defaultRequire": 1
