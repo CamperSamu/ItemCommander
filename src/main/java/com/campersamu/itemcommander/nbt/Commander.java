@@ -3,6 +3,8 @@ package com.campersamu.itemcommander.nbt;
 import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.exception.CommanderNoCommandException;
 import com.campersamu.itemcommander.exception.CommanderNoTagException;
+import eu.pb4.placeholders.TextParser;
+import eu.pb4.placeholders.util.TextParserUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -56,7 +58,7 @@ public record Commander(String command, CommanderAction action, CommanderSource 
         MinecraftServer server = player.server;
 
         if (commander.source() == SERVER) {
-            final String parsedCommand = commander.command().replace("@p", player.getEntityName()).replace("@s", player.getEntityName());
+            final String parsedCommand = TextParser.parse(commander.command().replace("@p", player.getEntityName()).replace("@s", player.getEntityName())).getString();
             server.getCommandManager().execute(server.getCommandSource(), parsedCommand);
         } else if (commander.source() == PLAYER) {
             server.getCommandManager().execute(player.getCommandSource(), commander.command());
