@@ -1,7 +1,6 @@
 package com.campersamu.itemcommander;
 
 import com.campersamu.itemcommander.command.CreateCommanderCommand;
-import com.campersamu.itemcommander.nbt.Commander;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,7 @@ public class ItemCommanderInit implements ModInitializer {
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger("itemcommander");
+	public static final String MODID = "itemcommander";
 
 	@Override
 	public void onInitialize() {

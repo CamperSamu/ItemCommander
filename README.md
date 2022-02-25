@@ -22,6 +22,23 @@ _command sources:_
 
 _defaults in **bold***_
 
+### Command placeholders
+_when creating a command you can use the following vanilla-like placeholders:_
+
+| Placeholder   | Action                              |
+| ------------- | ----------------------------------- |
+| `@itemname`   | Item Name                           |
+| `@pich`       | Player pitch                        |
+| `@yaw`        | Player yaw                          |
+| `@ix`         | Item use X coordinate               |
+| `@iy`         | Item use Y coordinate               |
+| `@iz`         | Item use Z coordinate               |
+| `@x`          | Player use X coordinate             |
+| `@y`          | Player use Y coordinate             |
+| `@z`          | Player use Z coordinate             |
+| `@p` and `@s` | The player using the Commander Item |
+
+
 ### This mod supports [LuckPerms' Fabric Permission API](https://luckperms.net/).
 - `commander.command.create` allows a player to use this mod to embed commands in items
 
