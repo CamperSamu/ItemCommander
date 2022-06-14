@@ -4,7 +4,7 @@
 A simple Serverside Fabric mod that allows you to assign commands to Item(Stacks).
 It works by adding NBT data to the item, then when a player uses an item the NBT data for that item is checked, if it contains the `ItemCommander` tag tree it executes the specified command.
 
-To embed a command in an item, hold it in your main hand and run `/commander create "<command>" [CONSUME_ACTION] [COMMAND_SOURCE]` 
+To embed a command in an item, hold it in your main hand and run `/commander create "<command>" [CONSUME_ACTION] [COMMAND_SOURCE] [cooldownTicks]` 
 
 _consume actions:_
 
