@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
+
 @Mixin(ServerPlayerInteractionManager.class)
 public class ItemInteractMixin {
     @Inject(
@@ -25,8 +27,9 @@ public class ItemInteractMixin {
     )
     private void checkInteraction(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         try {
-            cir.setReturnValue(Commander.fromNbt(stack.getOrCreateNbt()).executeCommand(player, stack, player.raycast(4, player.server.getTickTime(), false).getPos()
-            ));
+            if (stack.hasNbt()) {
+                cir.setReturnValue(Commander.fromNbt(Objects.requireNonNull(stack.getNbt())).executeCommand(player, stack, player.raycast(4, player.server.getTickTime(), false).getPos()));
+            }
         } catch (CommanderException ignored) {
         }
     }
