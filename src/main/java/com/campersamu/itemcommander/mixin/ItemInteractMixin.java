@@ -45,7 +45,9 @@ public class ItemInteractMixin {
 //    )
 //    private void onBlockInteraction(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir){
 //        try {
-//            cir.setReturnValue(Commander.fromNbt(stack.getOrCreateNbt()).executeCommand(player, stack, hitResult.getPos()));
+//            if (stack.hasNbt()) {
+//              cir.setReturnValue(Commander.fromNbt(stack.getOrCreateNbt()).executeCommand(player, stack, hitResult.getPos()));
+//            }
 //        } catch (CommanderException ignored) {}
 //    }
 }
