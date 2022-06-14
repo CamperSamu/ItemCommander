@@ -4,7 +4,7 @@
 A simple Serverside Fabric mod that allows you to assign commands to Item(Stacks).
 It works by adding NBT data to the item, then when a player uses an item the NBT data for that item is checked, if it contains the `ItemCommander` tag tree it executes the specified command.
 
-To embed a command in an item, hold it in your hand and run `/commander "<command>" [CONSUME_ACTION] [COMMAND_SOURCE]` 
+To embed a command in an item, hold it in your main hand and run `/commander create "<command>" [CONSUME_ACTION] [COMMAND_SOURCE]` 
 
 _consume actions:_
 
@@ -38,9 +38,12 @@ _when creating a command you can use the following vanilla-like placeholders:_
 | `@z`          | Player use Z coordinate             |
 | `@p` and `@s` | The player using the Commander Item |
 
+To append more commands to one item, hold a Commander Item in your main hand and run `/commander append "<command>"`
+
 
 ### This mod supports [LuckPerms' Fabric Permission API](https://luckperms.net/).
 - `commander.command.create` allows a player to use this mod to embed commands in items
+- `commander.command.append` allows a player to use this mod to append commands to a Commander Items
 
 ## Bleeding edge builds
 Upstream builds are available via [GitHub Actions](https://github.com/CamperSamu/ItemCommander/actions).
