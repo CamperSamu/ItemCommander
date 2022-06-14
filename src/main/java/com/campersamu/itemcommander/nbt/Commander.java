@@ -14,14 +14,18 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static com.campersamu.itemcommander.nbt.CommanderAction.CONSUME;
 import static com.campersamu.itemcommander.nbt.CommanderSource.PLAYER;
 import static com.campersamu.itemcommander.nbt.CommanderSource.SERVER;
+import static java.lang.Integer.max;
 
 /**
  * A container {@link Record} that allows easy manipulation of a {@link Commander Commander Item}.
  */
-public record Commander(String command, CommanderAction action, CommanderSource source) {
+public record Commander(String[] commands, CommanderAction action, CommanderSource source, int cooldown) {
     /**
      * Defines the tag name of the root of a {@link Commander Commander Item} NBT data.
      *
@@ -44,10 +48,26 @@ public record Commander(String command, CommanderAction action, CommanderSource 
     /**
      * Defines the tag name of a {@link Commander Commander Item}'s command source as NBT data.
      * Can either be {@link CommanderSource#SERVER executed by the SERVER} or {@link CommanderSource#PLAYER executed by the PLAYER}.
+     *
+     * @see net.minecraft.nbt.NbtInt
+     */
+    public static final String COMMANDER_COOLDOWN_KEY = "Cooldown";
+    /**
+     * Defines the tag name of a {@link Commander Commander Item}'s cooldown as NBT data.
+     * Can be any value between 0 and {@link Integer#MAX_VALUE 2147483647}.
+     *
+     * @see net.minecraft.nbt.NbtByte
      */
     public static final String COMMANDER_SOURCE_KEY = "Source";
     private static final CommanderNoCommandException CommanderNoCommandException = new CommanderNoCommandException();
     private static final CommanderNoTagException CommanderNoTagException = new CommanderNoTagException();
+
+    /**
+     * A container {@link Record} that allows easy manipulation of a {@link Commander Commander Item}.
+     */
+    public Commander(String command, CommanderAction action, CommanderSource source, int cooldown) {
+        this(new String[]{command}, action, source, cooldown);
+    }
 
     /**
      * Creates a Commander from a {@link ItemStack} NBT data.
@@ -64,11 +84,14 @@ public record Commander(String command, CommanderAction action, CommanderSource 
             if (nbt.contains(COMMANDER_COMMAND_KEY, NbtElement.STRING_TYPE)) {
                 if (nbt.contains(COMMANDER_ACTION_KEY, NbtElement.BYTE_TYPE)) {
                     if (nbt.contains(COMMANDER_SOURCE_KEY, NbtElement.BYTE_TYPE)) {
-                        return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)));
+                        if (nbt.contains(COMMANDER_COOLDOWN_KEY, NbtElement.INT_TYPE)) {
+                            return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)), max(0, nbt.getInt(COMMANDER_COOLDOWN_KEY)));
+                        }
+                        return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)), 0);
                     }
-                    return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), SERVER);
+                    return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), SERVER, 0);
                 }
-                return new Commander(nbt.getString(COMMANDER_COMMAND_KEY), CONSUME, SERVER);
+                return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CONSUME, SERVER, 0);
             }
             throw CommanderNoCommandException;
         }
@@ -83,10 +106,18 @@ public record Commander(String command, CommanderAction action, CommanderSource 
      */
     public static @NotNull NbtCompound toNbt(@NotNull Commander commander) {
         NbtCompound nbt = new NbtCompound();
-
-        nbt.putString(COMMANDER_COMMAND_KEY, commander.command());
+        StringBuilder commandsData = new StringBuilder(commander.commands()[0]);
+        if (commander.commands().length > 1) {
+            String[] strings = commander.commands();
+            for (int i = 1, stringsLength = strings.length; i < stringsLength; i++) {
+                String command = strings[i];
+                commandsData.append("|").append(command);
+            }
+        }
+        nbt.putString(COMMANDER_COMMAND_KEY, commandsData.toString());
         nbt.putByte(COMMANDER_ACTION_KEY, commander.action().id);
         nbt.putByte(COMMANDER_SOURCE_KEY, commander.source().id);
+        nbt.putInt(COMMANDER_COOLDOWN_KEY, commander.cooldown());
 
         return nbt;
     }
@@ -100,29 +131,57 @@ public record Commander(String command, CommanderAction action, CommanderSource 
      * @param pos       position of the interaction, usually is equals to where the item gets used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
-    public static ActionResult executeCommand(Commander commander, ServerPlayerEntity player, ItemStack itemStack, Vec3d pos) {
+    public static ActionResult executeCommand(final @NotNull Commander commander, final @NotNull ServerPlayerEntity player, final ItemStack itemStack, final Vec3d pos, final boolean isLectern) {
         MinecraftServer server = player.server;
 
-        String parsedCommand = TextParser.parse(
-                commander.command()
-                        .replace("@itemname", itemStack.getName().getString())
-                        .replace("@pitch", "" + player.getPitch())
-                        .replace("@yaw", "" + player.getHeadYaw())
-                        .replace("@ix", "" + pos.getX())
-                        .replace("@iy", "" + pos.getY())
-                        .replace("@iz", "" + pos.getZ())
-                        .replace("@x", "" + player.getPos().getX())
-                        .replace("@y", "" + player.getPos().getY())
-                        .replace("@z", "" + player.getPos().getZ())
-                        .replace("@p", player.getEntityName())
-                        .replace("@s", player.getEntityName())
-        ).getString();
-
-        if (commander.source() == SERVER) {
-            server.getCommandManager().execute(server.getCommandSource(), parsedCommand);
-        } else if (commander.source() == PLAYER) {
-            server.getCommandManager().execute(player.getCommandSource(), parsedCommand);
+        if (commander.cooldown() != 0){
+            if(player.getItemCooldownManager().isCoolingDown(itemStack.getItem())) return ActionResult.FAIL;
         }
+
+        ArrayList<String> parsedCommands = new ArrayList<>();
+
+        for (String command : commander.commands()) {
+            parsedCommands.add(TextParser.parse(
+                    command
+                            .replace("@itemname", itemStack.getName().getString())
+                            .replace("@pitch", "" + player.getPitch())
+                            .replace("@yaw", "" + player.getHeadYaw())
+                            .replace("@ix", "" + pos.getX())
+                            .replace("@iy", "" + pos.getY())
+                            .replace("@iz", "" + pos.getZ())
+                            .replace("@x", "" + player.getPos().getX())
+                            .replace("@y", "" + player.getPos().getY())
+                            .replace("@z", "" + player.getPos().getZ())
+                            .replace("@p", player.getEntityName())
+                            .replace("@s", player.getEntityName())
+            ).getString());
+        }
+
+
+//        String parsedCommand = TextParser.parse(
+//                commander.command()
+//                        .replace("@itemname", itemStack.getName().getString())
+//                        .replace("@pitch", "" + player.getPitch())
+//                        .replace("@yaw", "" + player.getHeadYaw())
+//                        .replace("@ix", "" + pos.getX())
+//                        .replace("@iy", "" + pos.getY())
+//                        .replace("@iz", "" + pos.getZ())
+//                        .replace("@x", "" + player.getPos().getX())
+//                        .replace("@y", "" + player.getPos().getY())
+//                        .replace("@z", "" + player.getPos().getZ())
+//                        .replace("@p", player.getEntityName())
+//                        .replace("@s", player.getEntityName())
+//        ).getString();
+
+        for (String parsedCommand : parsedCommands) {
+            if (commander.source() == SERVER) {
+                server.getCommandManager().execute(server.getCommandSource(), parsedCommand);
+            } else if (commander.source() == PLAYER) {
+                server.getCommandManager().execute(player.getCommandSource(), parsedCommand);
+            }
+        }
+
+        player.getItemCooldownManager().set(itemStack.getItem(), commander.cooldown());
 
         if (commander.action() != CONSUME) {
             return ActionResult.PASS;
@@ -139,8 +198,65 @@ public record Commander(String command, CommanderAction action, CommanderSource 
      * @param itemStack stack being used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
-    public static ActionResult executeCommand(Commander commander, ServerPlayerEntity player, ItemStack itemStack) {
-        return executeCommand(commander, player, itemStack, player.getPos());
+    public static ActionResult executeCommand(final Commander commander, final ServerPlayerEntity player, final ItemStack itemStack) {
+        return executeCommand(commander, player, itemStack, player.getPos(), false);
+    }
+
+    /**
+     * Executes the command attached to the item.
+     *
+     * @param player    player using the item.
+     * @param itemStack stack being used.
+     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
+     */
+    public ActionResult executeCommand(final ServerPlayerEntity player, final ItemStack itemStack) {
+        return executeCommand(this, player, itemStack, player.getPos(), false);
+    }
+
+    /**
+     * Executes the command attached to the item.
+     *
+     * @param player    player using the item.
+     * @param itemStack stack being used.
+     * @param pos       position of the interaction, usually is equals to where the item gets used.
+     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
+     */
+    public ActionResult executeCommand(final ServerPlayerEntity player, final ItemStack itemStack, final Vec3d pos) {
+        return executeCommand(this, player, itemStack, pos, false);
+    }
+
+    /**
+     * Executes the command attached to the item.
+     *
+     * @param player    player using the item.
+     * @param itemStack stack being used.
+     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
+     */
+    public static ActionResult executeCommand(final Commander commander, final ServerPlayerEntity player, final ItemStack itemStack, final boolean isLectern) {
+        return executeCommand(commander, player, itemStack, player.getPos(), isLectern);
+    }
+
+    /**
+     * Executes the command attached to the item.
+     *
+     * @param player    player using the item.
+     * @param itemStack stack being used.
+     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
+     */
+    public ActionResult executeCommand(final ServerPlayerEntity player, final ItemStack itemStack, final boolean isLectern) {
+        return executeCommand(this, player, itemStack, player.getPos(), isLectern);
+    }
+
+    /**
+     * Executes the command attached to the item.
+     *
+     * @param player    player using the item.
+     * @param itemStack stack being used.
+     * @param pos       position of the interaction, usually is equals to where the item gets used.
+     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
+     */
+    public ActionResult executeCommand(final ServerPlayerEntity player, final ItemStack itemStack, final Vec3d pos, final boolean isLectern) {
+        return executeCommand(this, player, itemStack, pos, isLectern);
     }
 
     /**
@@ -152,26 +268,13 @@ public record Commander(String command, CommanderAction action, CommanderSource 
         return toNbt(this);
     }
 
-    /**
-     * Executes the command attached to the item.
-     *
-     * @param player    player using the item.
-     * @param itemStack stack being used.
-     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
-     */
-    public ActionResult executeCommand(ServerPlayerEntity player, ItemStack itemStack) {
-        return executeCommand(this, player, itemStack, player.getPos());
+    public static @NotNull Commander appendCommand(final Commander commander, final String command){
+        final String[] newCommands = Arrays.copyOf(commander.commands(), commander.commands().length+1);
+        newCommands[commander.commands().length] = command;
+        return new Commander(newCommands, commander.action(), commander.source(), commander.cooldown());
     }
 
-    /**
-     * Executes the command attached to the item.
-     *
-     * @param player    player using the item.
-     * @param itemStack stack being used.
-     * @param pos       position of the interaction, usually is equals to where the item gets used.
-     * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
-     */
-    public ActionResult executeCommand(ServerPlayerEntity player, ItemStack itemStack, Vec3d pos) {
-        return executeCommand(this, player, itemStack, pos);
+    public @NotNull Commander appendCommand(final String command){
+        return appendCommand(this, command);
     }
 }

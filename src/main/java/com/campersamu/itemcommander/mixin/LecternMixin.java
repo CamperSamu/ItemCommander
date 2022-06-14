@@ -4,6 +4,7 @@ import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.nbt.Commander;
 import com.campersamu.itemcommander.nbt.CommanderAction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.LecternBlock;
 import net.minecraft.block.entity.LecternBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,7 +16,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,10 +26,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static java.util.Objects.requireNonNullElse;
 
 @Mixin(LecternBlock.class)
-public abstract class LecternMixin {
+public abstract class LecternMixin extends BlockWithEntity {
     @Shadow
     @Final
     public static BooleanProperty HAS_BOOK;
+
+    private LecternMixin(Settings settings) {
+        super(settings);
+    }
 
     @Shadow
     public static void setHasBook(World world, BlockPos pos, BlockState state, boolean hasBook) {}

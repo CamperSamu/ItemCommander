@@ -1,5 +1,6 @@
 package com.campersamu.itemcommander;
 
+import com.campersamu.itemcommander.command.AppendCommanderCommand;
 import com.campersamu.itemcommander.command.CreateCommanderCommand;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ public class ItemCommanderInit implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 		CreateCommanderCommand.init();
+		AppendCommanderCommand.init();
 		LOGGER.info(">when a stick is more powerful than you");
 	}
 }
