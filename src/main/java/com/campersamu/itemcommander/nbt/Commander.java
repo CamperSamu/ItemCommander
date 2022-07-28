@@ -3,7 +3,7 @@ package com.campersamu.itemcommander.nbt;
 import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.exception.CommanderNoCommandException;
 import com.campersamu.itemcommander.exception.CommanderNoTagException;
-import eu.pb4.placeholders.TextParser;
+import eu.pb4.placeholders.api.TextParserUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -131,6 +131,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      * @param pos       position of the interaction, usually is equals to where the item gets used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
+    @SuppressWarnings("unused") //utils
     public static ActionResult executeCommand(final @NotNull Commander commander, final @NotNull ServerPlayerEntity player, final ItemStack itemStack, final Vec3d pos, final boolean isLectern) {
         MinecraftServer server = player.server;
 
@@ -141,7 +142,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         ArrayList<String> parsedCommands = new ArrayList<>();
 
         for (String command : commander.commands()) {
-            parsedCommands.add(TextParser.parse(
+            parsedCommands.add(TextParserUtils.formatText(
                     command
                             .replace("@itemname", itemStack.getName().getString())
                             .replace("@pitch", "" + player.getPitch())
@@ -198,6 +199,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      * @param itemStack stack being used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
+    @SuppressWarnings("unused") //utils
     public static ActionResult executeCommand(final Commander commander, final ServerPlayerEntity player, final ItemStack itemStack) {
         return executeCommand(commander, player, itemStack, player.getPos(), false);
     }
@@ -232,6 +234,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      * @param itemStack stack being used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
+    @SuppressWarnings("unused") //utils
     public static ActionResult executeCommand(final Commander commander, final ServerPlayerEntity player, final ItemStack itemStack, final boolean isLectern) {
         return executeCommand(commander, player, itemStack, player.getPos(), isLectern);
     }
@@ -243,6 +246,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      * @param itemStack stack being used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
+    @SuppressWarnings("unused") //utils
     public ActionResult executeCommand(final ServerPlayerEntity player, final ItemStack itemStack, final boolean isLectern) {
         return executeCommand(this, player, itemStack, player.getPos(), isLectern);
     }
@@ -255,6 +259,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      * @param pos       position of the interaction, usually is equals to where the item gets used.
      * @return the result of the action, {@link ActionResult#PASS} if it's successful, {@link ActionResult#CONSUME} if it's successful and the item is  consumed.
      */
+    @SuppressWarnings("unused") //utils
     public ActionResult executeCommand(final ServerPlayerEntity player, final ItemStack itemStack, final Vec3d pos, final boolean isLectern) {
         return executeCommand(this, player, itemStack, pos, isLectern);
     }

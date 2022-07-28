@@ -4,9 +4,8 @@ import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.nbt.Commander;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -19,10 +18,10 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class AppendCommanderCommand {
-    protected static final Text errorNotCommanderItemText = new LiteralText("Not a Commander Item!").formatted(Formatting.RED);
+    protected static final Text errorNotCommanderItemText = Text.literal("Not a Commander Item!").formatted(Formatting.RED);
 
     public static void init() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
             dispatcher.getRoot().addChild(
                     literal("commander")
                             .then(literal("append")
@@ -57,7 +56,7 @@ public class AppendCommanderCommand {
 
     private static int execute(final @NotNull CommandContext<ServerCommandSource> context, final String command) throws CommandSyntaxException {
         final var ctxSource = context.getSource();
-        final var player = ctxSource.getPlayer();
+        final var player = ctxSource.getPlayerOrThrow();
         if (player == null) {
             ctxSource.sendError(errorNotPlayerText);
             return -1;

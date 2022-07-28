@@ -5,9 +5,8 @@ import com.campersamu.itemcommander.nbt.CommanderAction;
 import com.campersamu.itemcommander.nbt.CommanderSource;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -22,13 +21,13 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class CreateCommanderCommand {
-    protected static final Text errorNoCommandText = new LiteralText("A command must be specified!").formatted(Formatting.RED);
-    protected static final Text errorNotPlayerText = new LiteralText("This command requires a player!").formatted(Formatting.RED);
-    protected static final Text success = new LiteralText("Commander attached to item in hand!").formatted(Formatting.GREEN);
+    protected static final Text errorNoCommandText = Text.literal("A command must be specified!").formatted(Formatting.RED);
+    protected static final Text errorNotPlayerText = Text.literal("This command requires a player!").formatted(Formatting.RED);
+    protected static final Text success = Text.literal("Commander attached to item in hand!").formatted(Formatting.GREEN);
     protected static final String argumentCommand = "command", argumentCooldown = "cooldownTicks";
 
     public static void init() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
             //base command
             for (CommanderAction action : CommanderAction.values()) {
                 for (CommanderSource source : CommanderSource.values()) {
@@ -54,7 +53,7 @@ public class CreateCommanderCommand {
 
     private static int execute(final @NotNull CommandContext<ServerCommandSource> context, final CommanderAction action, final CommanderSource source) throws CommandSyntaxException {
         final var ctxSource = context.getSource();
-        final var player = ctxSource.getPlayer();
+        final var player = ctxSource.getPlayerOrThrow();
         if (player == null) {
             ctxSource.sendError(errorNotPlayerText);
             return -1;
