@@ -176,9 +176,9 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
 
         for (String parsedCommand : parsedCommands) {
             if (commander.source() == SERVER) {
-                server.getCommandManager().execute(server.getCommandSource(), parsedCommand);
+                server.getCommandManager().executeWithPrefix(server.getCommandSource(), parsedCommand);
             } else if (commander.source() == PLAYER) {
-                server.getCommandManager().execute(player.getCommandSource(), parsedCommand);
+                server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
             }
         }
 
