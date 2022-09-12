@@ -133,13 +133,13 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      */
     @SuppressWarnings("unused") //utils
     public static ActionResult executeCommand(final @NotNull Commander commander, final @NotNull ServerPlayerEntity player, final ItemStack itemStack, final Vec3d pos, final boolean isLectern) {
-        MinecraftServer server = player.server;
+        final MinecraftServer server = player.server;
 
         if (commander.cooldown() != 0){
             if(player.getItemCooldownManager().isCoolingDown(itemStack.getItem())) return ActionResult.FAIL;
         }
 
-        ArrayList<String> parsedCommands = new ArrayList<>();
+        final ArrayList<String> parsedCommands = new ArrayList<>();
 
         for (String command : commander.commands()) {
             parsedCommands.add(TextParserUtils.formatText(

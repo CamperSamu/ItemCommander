@@ -26,7 +26,7 @@ _defaults in **bold***_
 _when creating a command you can use the following vanilla-like placeholders:_
 
 | Placeholder   | Action                              |
-| ------------- | ----------------------------------- |
+|---------------|-------------------------------------|
 | `@itemname`   | Item Name                           |
 | `@pich`       | Player pitch                        |
 | `@yaw`        | Player yaw                          |
