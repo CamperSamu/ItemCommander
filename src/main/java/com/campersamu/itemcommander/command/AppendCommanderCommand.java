@@ -32,25 +32,6 @@ public class AppendCommanderCommand {
 
             );
             dispatcher.getRoot().addChild(literal("commander append").build());
-            //base command
-//            for (CommanderAction action : CommanderAction.values()) {
-//                for (CommanderSource source : CommanderSource.values()) {
-//                    dispatcher.getRoot().addChild(
-//                            literal("commander")
-//                                    .requires(require("commander.command.create", 4))
-//                                    .then(
-//                                            argument(argumentCommand, string()).executes(context -> execute(context, CommanderAction.CONSUME, CommanderSource.SERVER)).then(
-//                                                    literal(action.name()).executes(context -> execute(context, action, CommanderSource.SERVER)).then(
-//                                                            literal(source.name()).executes(context -> execute(context, action, source)).then(
-//                                                                    argument("cooldownTicks", integer()).executes(context -> execute(context, action, source))
-//                                                            )
-//                                                    )
-//                                            )
-//                                    ).build()
-//                    );
-//                }
-//            }
-
         });
     }
 

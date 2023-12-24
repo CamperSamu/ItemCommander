@@ -145,34 +145,19 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
             parsedCommands.add(TextParserUtils.formatText(
                     command
                             .replace("@itemname", itemStack.getName().getString())
-                            .replace("@pitch", "" + player.getPitch())
-                            .replace("@yaw", "" + player.getHeadYaw())
-                            .replace("@ix", "" + pos.getX())
-                            .replace("@iy", "" + pos.getY())
-                            .replace("@iz", "" + pos.getZ())
-                            .replace("@x", "" + player.getPos().getX())
-                            .replace("@y", "" + player.getPos().getY())
-                            .replace("@z", "" + player.getPos().getZ())
+                            .replace("@pitch", String.valueOf(player.getPitch()))
+                            .replace("@yaw", String.valueOf(player.getHeadYaw()))
+                            .replace("@ix", String.valueOf(pos.getX()))
+                            .replace("@iy", String.valueOf(pos.getY()))
+                            .replace("@iz", String.valueOf(pos.getZ()))
+                            .replace("@x", String.valueOf(player.getPos().getX()))
+                            .replace("@y", String.valueOf(player.getPos().getY()))
+                            .replace("@z", String.valueOf(player.getPos().getZ()))
                             .replace("@p", player.getEntityName())
                             .replace("@s", player.getEntityName())
             ).getString());
         }
 
-
-//        String parsedCommand = TextParser.parse(
-//                commander.command()
-//                        .replace("@itemname", itemStack.getName().getString())
-//                        .replace("@pitch", "" + player.getPitch())
-//                        .replace("@yaw", "" + player.getHeadYaw())
-//                        .replace("@ix", "" + pos.getX())
-//                        .replace("@iy", "" + pos.getY())
-//                        .replace("@iz", "" + pos.getZ())
-//                        .replace("@x", "" + player.getPos().getX())
-//                        .replace("@y", "" + player.getPos().getY())
-//                        .replace("@z", "" + player.getPos().getZ())
-//                        .replace("@p", player.getEntityName())
-//                        .replace("@s", player.getEntityName())
-//        ).getString();
 
         for (String parsedCommand : parsedCommands) {
             if (commander.source() == SERVER) {

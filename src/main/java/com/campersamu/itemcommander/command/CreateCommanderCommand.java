@@ -6,6 +6,8 @@ import com.campersamu.itemcommander.nbt.CommanderSource;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.argument.ItemStackArgument;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -17,6 +19,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
+import static net.minecraft.command.argument.ItemStackArgumentType.getItemStackArgument;
+import static net.minecraft.command.argument.ItemStackArgumentType.itemStack;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -24,7 +28,10 @@ public class CreateCommanderCommand {
     protected static final Text errorNoCommandText = Text.literal("A command must be specified!").formatted(Formatting.RED);
     protected static final Text errorNotPlayerText = Text.literal("This command requires a player!").formatted(Formatting.RED);
     protected static final Text success = Text.literal("Commander attached to item in hand!").formatted(Formatting.GREEN);
-    protected static final String argumentCommand = "command", argumentCooldown = "cooldownTicks";
+    protected static final String
+            argumentCommand = "command",
+            argumentCooldown = "cooldownTicks",
+            argumentItem = "itemNBT";
 
     public static void init() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
@@ -39,7 +46,9 @@ public class CreateCommanderCommand {
                                                     argument(argumentCommand, string()).executes(context -> execute(context, CommanderAction.CONSUME, CommanderSource.SERVER)).then(
                                                             literal(action.name()).executes(context -> execute(context, action, CommanderSource.SERVER)).then(
                                                                     literal(source.name()).executes(context -> execute(context, action, source)).then(
-                                                                            argument("cooldownTicks", integer()).executes(context -> execute(context, action, source))
+                                                                            argument(argumentCooldown, integer()).executes(context -> execute(context, action, source)).then(
+                                                                                    argument(argumentItem, itemStack(registryAccess))
+                                                                            )
                                                                     )
                                                             )
                                                     )
@@ -72,10 +81,24 @@ public class CreateCommanderCommand {
             cooldown = 0;
         }
 
+        ItemStackArgument stackArg;
+        try {
+            stackArg = getItemStackArgument(context, argumentItem);
+        } catch (Exception e) {
+            stackArg = null;
+        }
+
         final Commander commander = new Commander(command, action, source, cooldown);
 
-        player.getMainHandStack().getOrCreateNbt()
-                .put(COMMANDER_TAG_KEY, commander.toNbt());
+
+        if (stackArg == null) {
+            player.getMainHandStack().getOrCreateNbt()
+                    .put(COMMANDER_TAG_KEY, commander.toNbt());
+        } else {
+            final ItemStack stack = stackArg.createStack(1, true);
+            stack.getOrCreateNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
+            player.giveItemStack(stack);
+        }
 
         ctxSource.sendFeedback(success, true);
 
