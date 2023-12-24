@@ -47,7 +47,7 @@ public class CreateCommanderCommand {
                                                             literal(action.name()).executes(context -> execute(context, action, CommanderSource.SERVER)).then(
                                                                     literal(source.name()).executes(context -> execute(context, action, source)).then(
                                                                             argument(argumentCooldown, integer()).executes(context -> execute(context, action, source)).then(
-                                                                                    argument(argumentItem, itemStack(registryAccess))
+                                                                                    argument(argumentItem, itemStack(registryAccess)).executes(ctx -> execute(ctx, action, source))
                                                                             )
                                                                     )
                                                             )
@@ -100,7 +100,7 @@ public class CreateCommanderCommand {
             player.giveItemStack(stack);
         }
 
-        ctxSource.sendFeedback(success, true);
+        ctxSource.sendFeedback(() -> success, true);
 
         return 1;
     }

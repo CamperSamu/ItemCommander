@@ -57,7 +57,7 @@ public class AppendCommanderCommand {
             return -1;
         }
 
-        ctxSource.sendFeedback(success, true);
+        ctxSource.sendFeedback(() -> success, true);
         return 1;
     }
 }

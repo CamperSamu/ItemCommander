@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.LecternBlock;
 import net.minecraft.block.entity.LecternBlockEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -16,6 +17,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,12 +33,13 @@ public abstract class LecternMixin extends BlockWithEntity {
     @Final
     public static BooleanProperty HAS_BOOK;
 
+    @Shadow
+    public static void setHasBook(@Nullable Entity user, World world, BlockPos pos, BlockState state, boolean hasBook) {
+    }
+
     private LecternMixin(Settings settings) {
         super(settings);
     }
-
-    @Shadow
-    public static void setHasBook(World world, BlockPos pos, BlockState state, boolean hasBook) {}
 
     @Inject(
             method = "onUse",
@@ -52,7 +55,7 @@ public abstract class LecternMixin extends BlockWithEntity {
                 final ActionResult result = commander.executeCommand(serverPlayer, stack);
                 if (commander.action() == CommanderAction.CONSUME) {
                     lectern.setBook(stack.split(1));
-                    setHasBook(world, pos, state, false);
+                    setHasBook(player, world, pos, state, false);
                 }
                 cir.setReturnValue(result);
             } catch (CommanderException ignored) {

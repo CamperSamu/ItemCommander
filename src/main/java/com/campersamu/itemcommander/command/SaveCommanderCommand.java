@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static com.campersamu.itemcommander.config.CommanderIO.saveItemToFile;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
@@ -48,7 +49,7 @@ public class SaveCommanderCommand
         final var stack = player.getMainHandStack();
 
         if (stack.equals(ItemStack.EMPTY) || stack.equals(new ItemStack(Items.AIR))) {
-            ctxSource.sendFeedback(errorCannotSaveAirCommanderItemError, true);
+            ctxSource.sendFeedback(() -> errorCannotSaveAirCommanderItemError, true);
             return -1;
         }
 
@@ -60,7 +61,8 @@ public class SaveCommanderCommand
 
         saveItemToFile(stack, fileName);
 
-        ctxSource.sendFeedback(successText(fileName), true);
+        @NotNull String finalFileProxy = fileName;
+        ctxSource.sendFeedback(() -> successText(finalFileProxy), true);
         return 0;
     }
 

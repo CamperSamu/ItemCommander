@@ -28,7 +28,7 @@ public class ItemInteractMixin {
     private void checkInteraction(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         try {
             if (stack.hasNbt()) {
-                cir.setReturnValue(Commander.fromNbt(Objects.requireNonNull(stack.getNbt())).executeCommand(player, stack, player.raycast(4, player.server.getTickTime(), false).getPos()));
+                cir.setReturnValue(Commander.fromNbt(Objects.requireNonNull(stack.getNbt())).executeCommand(player, stack, player.raycast(4, 1.0F, false).getPos()));
             }
         } catch (CommanderException ignored) {
         }

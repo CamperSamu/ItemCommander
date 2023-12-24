@@ -153,8 +153,8 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
                             .replace("@x", String.valueOf(player.getPos().getX()))
                             .replace("@y", String.valueOf(player.getPos().getY()))
                             .replace("@z", String.valueOf(player.getPos().getZ()))
-                            .replace("@p", player.getEntityName())
-                            .replace("@s", player.getEntityName())
+                            .replace("@p", player.getGameProfile().getName())
+                            .replace("@s", player.getGameProfile().getName())
             ).getString());
         }
 

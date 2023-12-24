@@ -63,7 +63,7 @@ public interface CommanderIO {
                 ? fileName
                 : fileName + ".nbt";
         try {
-            NbtIo.write(stack.writeNbt(new NbtCompound()), CONFIG_FOLDER.resolve(fileName).toFile());
+            NbtIo.write(stack.writeNbt(new NbtCompound()), CONFIG_FOLDER.resolve(fileName));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -82,6 +82,6 @@ public interface CommanderIO {
         fileName = (fileName.contains(".nbt"))
                 ? fileName
                 : fileName + ".nbt";
-        return ItemStack.fromNbt(NbtIo.read(CONFIG_FOLDER.resolve(fileName).toFile()));
+        return ItemStack.fromNbt(NbtIo.read(CONFIG_FOLDER.resolve(fileName)));
     }
 }

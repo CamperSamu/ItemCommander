@@ -65,12 +65,12 @@ public class GiveCommanderCommand
             stack.setCount(quantity);
             player.giveItemStack(stack);
         } catch (IOException e) {
-            ctxSource.sendFeedback(errorText(fileName), true);
+            ctxSource.sendFeedback(() -> errorText(fileName), true);
             e.printStackTrace();
             return -1;
         }
 
-        ctxSource.sendFeedback(successText(fileName), true);
+        ctxSource.sendFeedback(() -> successText(fileName), true);
         return 0;
     }
 
