@@ -64,7 +64,7 @@ public interface CommanderIO {
                 ? fileName
                 : fileName + ".nbt";
         try {
-            NbtIo.write(stack.writeNbt(new NbtCompound()), CONFIG_FOLDER.resolve(fileName));
+            NbtIo.write(stack.writeNbt(new NbtCompound()), CONFIG_FOLDER.resolve(fileName).toFile());
         } catch (IOException e) {
             LOGGER.error("Failed to save item to file", e);
             throw new RuntimeException(e);
@@ -83,6 +83,6 @@ public interface CommanderIO {
         fileName = (fileName.contains(".nbt"))
                 ? fileName
                 : fileName + ".nbt";
-        return ItemStack.fromNbt(NbtIo.read(CONFIG_FOLDER.resolve(fileName)));
+        return ItemStack.fromNbt(NbtIo.read(CONFIG_FOLDER.resolve(fileName).toFile()));
     }
 }
