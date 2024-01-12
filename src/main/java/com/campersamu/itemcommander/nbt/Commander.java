@@ -107,7 +107,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
             PLAYER_Z_PLACEHOLDER = "@z",
 
             /**
-             * Closest Target Command Placeholder
+             * Command Placeholder Alias for {@link Commander#TARGET_SELF_PLACEHOLDER}
              */
             CLOSEST_TARGET_PLACEHOLDER = "@p",
 
