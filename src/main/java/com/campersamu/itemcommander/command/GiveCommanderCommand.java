@@ -1,31 +1,44 @@
 package com.campersamu.itemcommander.command;
 
 import com.campersamu.itemcommander.config.CommanderIO;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 import static com.campersamu.itemcommander.config.CommanderIO.getFileNames;
 import static com.campersamu.itemcommander.config.CommanderIO.loadFromFile;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
 import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
+import static java.util.List.of;
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
+import static net.minecraft.command.argument.EntityArgumentType.getPlayers;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class GiveCommanderCommand
         implements CommanderIO {
-    protected static final String successCommanderItemString = "Item %s given!";
-    protected static final String errorCommanderItemString = "Item file %s was not found!";
-    protected static final String fileNameArgument = "fileName";
-    protected static final String quantityArgument = "quantity";
+    protected static final String
+            successCommanderItemString = "Item %s given!",
+            errorCommanderItemString = "Item file %s was not found!",
+            fileNameArgument = "fileName",
+            quantityArgument = "quantity",
+            targetArgument = "target";
 
     public static void init() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
@@ -46,8 +59,10 @@ public class GiveCommanderCommand
 
                                                 return builder.buildFuture();
                                             })
-                                            .executes(context -> execute(context, context.getArgument(fileNameArgument, String.class), 1))
-                                            .then(argument(quantityArgument, integer()).executes(context -> execute(context, context.getArgument(fileNameArgument, String.class), context.getArgument(quantityArgument, Integer.class)))))
+                                            .executes(context -> execute(context, getString(context, fileNameArgument), 1, of(context.getSource().getPlayerOrThrow())))
+                                            .then(argument(quantityArgument, integer())
+                                                    .executes(context -> execute(context, getString(context, fileNameArgument), getInteger(context, quantityArgument), of(context.getSource().getPlayerOrThrow())))
+                                                    .then(argument(targetArgument, EntityArgumentType.entities()).executes(context -> execute(context, getString(context, fileNameArgument), getInteger(context, quantityArgument), getPlayers(context, targetArgument))))))
                             )
                             .build()
 
@@ -57,14 +72,13 @@ public class GiveCommanderCommand
         });
     }
 
-    private static int execute(final @NotNull CommandContext<ServerCommandSource> context, @NotNull String fileName, final int quantity) throws CommandSyntaxException {
+    private static int execute(final @NotNull CommandContext<ServerCommandSource> context, @NotNull String fileName, final int quantity, @NotNull final Collection<ServerPlayerEntity> players) {
         final var ctxSource = context.getSource();
-        final var player = ctxSource.getPlayerOrThrow();
 
         try {
             final var stack = loadFromFile(fileName);
             stack.setCount(quantity);
-            player.giveItemStack(stack);
+            players.forEach(player -> player.giveItemStack(stack));
         } catch (IOException e) {
             ctxSource.sendFeedback(() -> errorText(fileName), true);
             LOGGER.error("Failed to load item from file " + fileName, e);
