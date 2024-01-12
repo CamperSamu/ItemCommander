@@ -1,13 +1,9 @@
 package com.campersamu.itemcommander.command;
 
 import com.campersamu.itemcommander.config.CommanderIO;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -16,15 +12,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
+import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
 import static com.campersamu.itemcommander.config.CommanderIO.getFileNames;
 import static com.campersamu.itemcommander.config.CommanderIO.loadFromFile;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
 import static java.util.List.of;
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
 import static net.minecraft.command.argument.EntityArgumentType.getPlayers;
