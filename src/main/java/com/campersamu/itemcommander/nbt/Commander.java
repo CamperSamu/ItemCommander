@@ -17,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.campersamu.itemcommander.ItemCommanderInit.PLACEHOLDERS_LOADED;
 import static com.campersamu.itemcommander.nbt.CommanderAction.CONSUME;
-import static com.campersamu.itemcommander.nbt.CommanderSource.PLAYER;
 import static com.campersamu.itemcommander.nbt.CommanderSource.SERVER;
 import static java.lang.Integer.max;
 
@@ -59,6 +59,63 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
      * @see net.minecraft.nbt.NbtByte
      */
     public static final String COMMANDER_SOURCE_KEY = "Source";
+
+    /**
+     * Item Name Command Placeholder
+     */
+    public static final String
+            ITEMNAME_PLACEHOLDER = "@itemname",
+
+            /**
+             * Player Pitch Command Placeholder
+             */
+            PLAYER_PITCH_PLACEHOLDER = "@pitch",
+
+            /**
+             * Player Yaw Command Placeholder
+             */
+            PLAYER_YAW_PLACEHOLDER = "@yaw",
+
+            /**
+             * Item Use X Coordinate Command Placeholder
+             */
+            ITEM_USE_X_PLACEHOLDER = "@ix",
+
+            /**
+             * Item Use Y Coordinate Command Placeholder
+             */
+            ITEM_USE_Y_PLACEHOLDER = "@iy",
+
+            /**
+             * Item Use Z Coordinate Command Placeholder
+             */
+            ITEM_USE_Z_PLACEHOLDER = "@iz",
+
+            /**
+             * Player X Coordinate Command Placeholder
+             */
+            PLAYER_X_PLACEHOLDER = "@x",
+
+            /**
+             * Player Y Coordinate Command Placeholder
+             */
+            PLAYER_Y_PLACEHOLDER = "@y",
+
+            /**
+             * Player Z Coordinate Command Placeholder
+             */
+            PLAYER_Z_PLACEHOLDER = "@z",
+
+            /**
+             * Closest Target Command Placeholder
+             */
+            CLOSEST_TARGET_PLACEHOLDER = "@p",
+
+            /**
+             * Player (Target Self) Command Placeholder
+             */
+            TARGET_SELF_PLACEHOLDER = "@s";
+
     private static final CommanderNoCommandException CommanderNoCommandException = new CommanderNoCommandException();
     private static final CommanderNoTagException CommanderNoTagException = new CommanderNoTagException();
 
@@ -144,18 +201,18 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         for (String command : commander.commands()) {
             parsedCommands.add(TextParserUtils.formatText(
                     command
-                            .replace("@itemname", itemStack.getName().getString())
-                            .replace("@pitch", String.valueOf(player.getPitch()))
-                            .replace("@yaw", String.valueOf(player.getHeadYaw()))
-                            .replace("@ix", String.valueOf(pos.getX()))
-                            .replace("@iy", String.valueOf(pos.getY()))
-                            .replace("@iz", String.valueOf(pos.getZ()))
-                            .replace("@x", String.valueOf(player.getPos().getX()))
-                            .replace("@y", String.valueOf(player.getPos().getY()))
-                            .replace("@z", String.valueOf(player.getPos().getZ()))
-                            .replace("@p", player.getGameProfile().getName())
-                            .replace("@s", player.getGameProfile().getName())
-            ).getString());
+                            .replace(ITEMNAME_PLACEHOLDER, itemStack.getName().getString())
+                            .replace(PLAYER_PITCH_PLACEHOLDER, String.valueOf(player.getPitch()))
+                            .replace(PLAYER_YAW_PLACEHOLDER, String.valueOf(player.getHeadYaw()))
+                            .replace(ITEM_USE_X_PLACEHOLDER, String.valueOf(pos.getX()))
+                            .replace(ITEM_USE_Y_PLACEHOLDER, String.valueOf(pos.getY()))
+                            .replace(ITEM_USE_Z_PLACEHOLDER, String.valueOf(pos.getZ()))
+                            .replace(PLAYER_X_PLACEHOLDER, String.valueOf(player.getPos().getX()))
+                            .replace(PLAYER_Y_PLACEHOLDER, String.valueOf(player.getPos().getY()))
+                            .replace(PLAYER_Z_PLACEHOLDER, String.valueOf(player.getPos().getZ()))
+                            .replace(CLOSEST_TARGET_PLACEHOLDER, player.getGameProfile().getName())
+                            .replace(TARGET_SELF_PLACEHOLDER, player.getGameProfile().getName())
+            ));
         }
 
 
@@ -258,7 +315,8 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         return toNbt(this);
     }
 
-    public static @NotNull Commander appendCommand(final Commander commander, final String command){
+    @Contract("_, _ -> new")
+    public static @NotNull Commander appendCommand(final @NotNull Commander commander, final String command){
         final String[] newCommands = Arrays.copyOf(commander.commands(), commander.commands().length+1);
         newCommands[commander.commands().length] = command;
         return new Commander(newCommands, commander.action(), commander.source(), commander.cooldown());
