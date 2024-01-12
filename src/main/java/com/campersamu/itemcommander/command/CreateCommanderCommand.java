@@ -25,9 +25,11 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class CreateCommanderCommand {
-    protected static final Text errorNoCommandText = Text.literal("A command must be specified!").formatted(Formatting.RED);
-    protected static final Text errorNotPlayerText = Text.literal("This command requires a player!").formatted(Formatting.RED);
-    protected static final Text success = Text.literal("Commander attached to item in hand!").formatted(Formatting.GREEN);
+    protected static final Text
+            errorNoCommandText = Text.literal("A command must be specified!").formatted(Formatting.RED),
+            errorNotPlayerText = Text.literal("This command requires a player!").formatted(Formatting.RED),
+            errorNoItemInHandText = Text.literal("You need to hold an item!").formatted(Formatting.RED),
+            success = Text.literal("Commander attached to item in hand!").formatted(Formatting.GREEN);
     protected static final String
             argumentCommand = "command",
             argumentCooldown = "cooldownTicks",
@@ -77,14 +79,14 @@ public class CreateCommanderCommand {
         int cooldown;
         try {
             cooldown = getInteger(context, argumentCooldown);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             cooldown = 0;
         }
 
         ItemStackArgument stackArg;
         try {
             stackArg = getItemStackArgument(context, argumentItem);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             stackArg = null;
         }
 
@@ -92,6 +94,10 @@ public class CreateCommanderCommand {
 
 
         if (stackArg == null) {
+            if (player.getMainHandStack().isEmpty()) {
+                ctxSource.sendError(errorNoItemInHandText);
+                return -1;
+            }
             player.getMainHandStack().getOrCreateNbt()
                     .put(COMMANDER_TAG_KEY, commander.toNbt());
         } else {
