@@ -1,8 +1,9 @@
 package com.campersamu.itemcommander.nbt;
 
 public enum CommanderSource {
-    SERVER((byte)0),
-    PLAYER((byte)1);
+    SERVER((byte) 0),
+    PLAYER((byte) 1),
+    OP((byte) 2);
 
     public final byte id;
 
@@ -10,16 +11,11 @@ public enum CommanderSource {
         this.id = id;
     }
 
-    public static CommanderSource fromId(byte id){
-        //todo: more sources
-//        return switch (id){
-//            case 1 -> KEEP;
-//            default -> CONSUME;
-//        };
-
-        if(id == 1)
-            return PLAYER;
-
-        return SERVER;
+    public static CommanderSource fromId(byte id) {
+        return switch (id) {
+            case 1 -> PLAYER;
+            case 2 -> OP;
+            default -> SERVER;
+        };
     }
 }

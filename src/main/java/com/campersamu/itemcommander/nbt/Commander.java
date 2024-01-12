@@ -136,7 +136,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         final MinecraftServer server = player.server;
 
         if (commander.cooldown() != 0){
-            if(player.getItemCooldownManager().isCoolingDown(itemStack.getItem())) return ActionResult.FAIL;
+            if (player.getItemCooldownManager().isCoolingDown(itemStack.getItem())) return ActionResult.FAIL;
         }
 
         final ArrayList<String> parsedCommands = new ArrayList<>();
@@ -160,10 +160,10 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
 
 
         for (String parsedCommand : parsedCommands) {
-            if (commander.source() == SERVER) {
-                server.getCommandManager().executeWithPrefix(server.getCommandSource(), parsedCommand);
-            } else if (commander.source() == PLAYER) {
-                server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
+            switch (commander.source()) {
+                case SERVER -> server.getCommandManager().executeWithPrefix(server.getCommandSource(), parsedCommand);
+                case OP -> server.getCommandManager().executeWithPrefix(player.getCommandSource().withLevel(4), parsedCommand);
+                default -> server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
             }
         }
 
