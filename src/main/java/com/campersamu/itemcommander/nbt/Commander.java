@@ -199,7 +199,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         final ArrayList<String> parsedCommands = new ArrayList<>();
 
         for (String command : commander.commands()) {
-            parsedCommands.add(TextParserUtils.formatText(
+            parsedCommands.add(applyPlaceholdersApiIfPresent(
                     command
                             .replace(ITEMNAME_PLACEHOLDER, itemStack.getName().getString())
                             .replace(PLAYER_PITCH_PLACEHOLDER, String.valueOf(player.getPitch()))
@@ -324,5 +324,11 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
 
     public @NotNull Commander appendCommand(final String command){
         return appendCommand(this, command);
+    }
+
+    public static String applyPlaceholdersApiIfPresent(final @NotNull String text) {
+        return PLACEHOLDERS_LOADED
+                ? TextParserUtils.formatText(text).getString()
+                : text;
     }
 }

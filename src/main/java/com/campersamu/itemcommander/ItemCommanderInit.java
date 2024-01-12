@@ -6,12 +6,14 @@ import com.campersamu.itemcommander.command.GiveCommanderCommand;
 import com.campersamu.itemcommander.command.SaveCommanderCommand;
 import com.campersamu.itemcommander.config.CommanderIO;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ItemCommanderInit implements ModInitializer {
     public static final String MODID = "itemcommander";
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+    public static final boolean PLACEHOLDERS_LOADED = FabricLoader.getInstance().isModLoaded("placeholder-api");
 
     @Override
     public void onInitialize() {
