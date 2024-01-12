@@ -15,6 +15,7 @@ import static com.campersamu.itemcommander.config.CommanderIO.getFileNames;
 import static com.campersamu.itemcommander.config.CommanderIO.loadFromFile;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -66,7 +67,7 @@ public class GiveCommanderCommand
             player.giveItemStack(stack);
         } catch (IOException e) {
             ctxSource.sendFeedback(() -> errorText(fileName), true);
-            e.printStackTrace();
+            LOGGER.error("Failed to load item from file " + fileName, e);
             return -1;
         }
 

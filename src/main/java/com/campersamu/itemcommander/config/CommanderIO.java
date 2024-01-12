@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -32,7 +33,7 @@ public interface CommanderIO {
                                             file, CONFIG_FOLDER.resolve(fileName.replace(" ", "_")),
                                             REPLACE_EXISTING, COPY_ATTRIBUTES);
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    LOGGER.error("Failed to fixup config files", e);
                                 }
                             }
                         });
@@ -65,7 +66,7 @@ public interface CommanderIO {
         try {
             NbtIo.write(stack.writeNbt(new NbtCompound()), CONFIG_FOLDER.resolve(fileName));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Failed to save item to file", e);
             throw new RuntimeException(e);
         }
     }

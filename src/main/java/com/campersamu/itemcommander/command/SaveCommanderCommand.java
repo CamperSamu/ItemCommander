@@ -13,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static com.campersamu.itemcommander.config.CommanderIO.saveItemToFile;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
