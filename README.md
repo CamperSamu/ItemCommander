@@ -15,11 +15,13 @@ _consume actions:_
 
 _command sources:_
 
-| Action     | Description                            |
-|------------|----------------------------------------|
-| **SERVER** | Command executed by the server         |
-| PLAYER     | Command executed by the player         |
-| OP         | Command executed by the player with OP |
+| Action           | Description                                                                                                                                                                    |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **SERVER**       | Command executed by the server                                                                                                                                                 |
+| PLAYER           | Command executed by the player                                                                                                                                                 |
+| OP               | Command executed by the player with OP                                                                                                                                         |
+| SERVER_AS_PLAYER | Command executed by the server as the player (like OP)                                                                                                                         |
+| DANGEROUSLY_OP   | Command executed by the player whilst being OP [⚠️](https://github.com/CamperSamu/ItemCommander/ "THIS CONTEXT CAN BE DANGEROUS AND MIGHT LEAD TO EXPLOITS, USE WITH CAUTION") |
 
 _defaults in **bold***_
 
