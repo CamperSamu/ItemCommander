@@ -216,11 +216,19 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         }
 
 
+
         for (String parsedCommand : parsedCommands) {
             switch (commander.source()) {
                 case SERVER -> server.getCommandManager().executeWithPrefix(server.getCommandSource(), parsedCommand);
                 case SERVER_AS_PLAYER -> server.getCommandManager().executeWithPrefix(server.getCommandSource().withEntity(player), parsedCommand);
-                case OP -> server.getCommandManager().executeWithPrefix(player.getCommandSource().withLevel(4), parsedCommand);
+                case OP -> server.getCommandManager().executeWithPrefix(player.getCommandSource().withLevel(server.getOpPermissionLevel()), parsedCommand);
+                case DANGEROUSLY_OP -> {
+                    synchronized (server.getPlayerManager().getOpList()) {
+                        server.getPlayerManager().addToOperators(player.getGameProfile());
+                        server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
+                        server.getPlayerManager().removeFromOperators(player.getGameProfile());
+                    }
+                }
                 default -> server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
             }
         }
