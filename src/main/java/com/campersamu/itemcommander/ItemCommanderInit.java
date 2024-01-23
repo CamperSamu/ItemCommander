@@ -26,6 +26,8 @@ public class ItemCommanderInit implements ModInitializer {
         SaveCommanderCommand.init();
         GiveCommanderCommand.init();
         //endregion
+        LOGGER.info(">item commander loading");
+        LOGGER.info(">placeholder-api support: " + (PLACEHOLDERS_LOADED ? "enabled" : "disabled"));
         LOGGER.info(">when a stick is more powerful than you");
     }
 }
