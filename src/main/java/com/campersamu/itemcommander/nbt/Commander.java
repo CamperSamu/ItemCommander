@@ -3,12 +3,15 @@ package com.campersamu.itemcommander.nbt;
 import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.exception.CommanderNoCommandException;
 import com.campersamu.itemcommander.exception.CommanderNoTagException;
-import eu.pb4.placeholders.api.TextParserUtils;
+import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.api.Placeholders;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Contract;
@@ -200,6 +203,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
 
         for (String command : commander.commands()) {
             parsedCommands.add(applyPlaceholdersApiIfPresent(
+                    commander.source.vanilla(player),
                     command
                             .replace(ITEMNAME_PLACEHOLDER, itemStack.getName().getString())
                             .replace(PLAYER_PITCH_PLACEHOLDER, String.valueOf(player.getPitch()))
@@ -222,13 +226,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
                 case SERVER -> server.getCommandManager().executeWithPrefix(server.getCommandSource(), parsedCommand);
                 case SERVER_AS_PLAYER -> server.getCommandManager().executeWithPrefix(server.getCommandSource().withEntity(player), parsedCommand);
                 case OP -> server.getCommandManager().executeWithPrefix(player.getCommandSource().withLevel(server.getOpPermissionLevel()), parsedCommand);
-                case DANGEROUSLY_OP -> {
-                    synchronized (server.getPlayerManager().getOpList()) {
-                        server.getPlayerManager().addToOperators(player.getGameProfile());
-                        server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
-                        server.getPlayerManager().removeFromOperators(player.getGameProfile());
-                    }
-                }
+                case DANGEROUSLY_OP -> executeCommandDangerously(server, player, parsedCommand);
                 default -> server.getCommandManager().executeWithPrefix(player.getCommandSource(), parsedCommand);
             }
         }
@@ -335,9 +333,18 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
         return appendCommand(this, command);
     }
 
-    public static String applyPlaceholdersApiIfPresent(final @NotNull String text) {
+    public static String applyPlaceholdersApiIfPresent(final @NotNull ServerCommandSource source, final @NotNull String text) {
         return PLACEHOLDERS_LOADED
-                ? TextParserUtils.formatText(text).getString()
+                ? Placeholders.parseText(Text.of(text), PlaceholderContext.of(source)).getString()
                 : text;
+    }
+
+    public static void executeCommandDangerously(@NotNull MinecraftServer server, @NotNull ServerPlayerEntity player, String command) {
+        synchronized (server.getPlayerManager().getOpList()) {
+            var op = server.getPlayerManager().isOperator(player.getGameProfile());
+            if (!op) server.getPlayerManager().addToOperators(player.getGameProfile());
+            server.getCommandManager().executeWithPrefix(player.getCommandSource(), command);
+            if (!op) server.getPlayerManager().removeFromOperators(player.getGameProfile());
+        }
     }
 }
