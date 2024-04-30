@@ -341,7 +341,7 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
 
     public static void executeCommandDangerously(@NotNull MinecraftServer server, @NotNull ServerPlayerEntity player, String command) {
         synchronized (server.getPlayerManager().getOpList()) {
-            var op = server.getPlayerManager().isOperator(player.getGameProfile());
+            final var op = server.getPlayerManager().isOperator(player.getGameProfile());
             if (!op) server.getPlayerManager().addToOperators(player.getGameProfile());
             server.getCommandManager().executeWithPrefix(player.getCommandSource(), command);
             if (!op) server.getPlayerManager().removeFromOperators(player.getGameProfile());

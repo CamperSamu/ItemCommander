@@ -5,6 +5,9 @@ import com.campersamu.itemcommander.nbt.Commander;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -49,8 +52,8 @@ public class AppendCommanderCommand {
         }
 
         try {
-            final Commander commander = Commander.fromNbt(player.getMainHandStack().getOrCreateNbt()).appendCommand(command);
-            player.getMainHandStack().getOrCreateNbt()
+            final Commander commander = Commander.fromNbt(player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt()).appendCommand(command);
+            player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt()
                     .put(COMMANDER_TAG_KEY, commander.toNbt());
         } catch (CommanderException e) {
             ctxSource.sendError(errorNotCommanderItemText);

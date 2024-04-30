@@ -1,4 +1,4 @@
 package com.campersamu.itemcommander.exception;
 
-public abstract class CommanderException extends Exception{
+public abstract class CommanderException extends Exception {
 }

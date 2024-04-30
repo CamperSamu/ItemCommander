@@ -1,15 +1,18 @@
 package com.campersamu.itemcommander.config;
 
+import com.mojang.datafixers.DataFixerUpper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
@@ -64,7 +67,8 @@ public interface CommanderIO {
                 ? fileName
                 : fileName + ".nbt";
         try {
-            NbtIo.write(stack.writeNbt(new NbtCompound()), CONFIG_FOLDER.resolve(fileName));
+            if (!(FabricLoader.getInstance().getGameInstance() instanceof MinecraftServer server)) return;
+            NbtIo.write((NbtCompound) stack.encodeAllowEmpty(server.getRegistryManager()), CONFIG_FOLDER.resolve(fileName));
         } catch (IOException e) {
             LOGGER.error("Failed to save item to file", e);
             throw new RuntimeException(e);
@@ -83,6 +87,8 @@ public interface CommanderIO {
         fileName = (fileName.contains(".nbt"))
                 ? fileName
                 : fileName + ".nbt";
-        return ItemStack.fromNbt(NbtIo.read(CONFIG_FOLDER.resolve(fileName)));
+        if (!(FabricLoader.getInstance().getGameInstance() instanceof MinecraftServer server)) return ItemStack.EMPTY;
+//        server.getDataFixer().update()
+        return ItemStack.fromNbtOrEmpty(server.getRegistryManager(), Objects.requireNonNull(NbtIo.read(CONFIG_FOLDER.resolve(fileName))));
     }
 }

@@ -76,7 +76,7 @@ public class GiveCommanderCommand
             players.forEach(player -> player.giveItemStack(stack));
         } catch (IOException e) {
             ctxSource.sendFeedback(() -> errorText(fileName), true);
-            LOGGER.error("Failed to load item from file " + fileName, e);
+            LOGGER.error("Failed to load item from file {}", fileName, e);
             return -1;
         }
 

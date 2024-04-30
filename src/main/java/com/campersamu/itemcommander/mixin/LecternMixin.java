@@ -7,9 +7,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.LecternBlock;
 import net.minecraft.block.entity.LecternBlockEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
@@ -46,12 +49,12 @@ public abstract class LecternMixin extends BlockWithEntity {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void onUseCommand(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
+    private void onUseCommand(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
         if (player instanceof ServerPlayerEntity serverPlayer && state.get(HAS_BOOK))
             try {
                 final LecternBlockEntity lectern = requireNonNullElse((LecternBlockEntity) world.getBlockEntity(pos), new LecternBlockEntity(pos, state));
                 final ItemStack stack = lectern.getBook();
-                final Commander commander = Commander.fromNbt(stack.getOrCreateNbt());
+                final Commander commander = Commander.fromNbt(stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt());
                 final ActionResult result = commander.executeCommand(serverPlayer, stack);
                 if (commander.action() == CommanderAction.CONSUME) {
                     lectern.setBook(stack.split(1));

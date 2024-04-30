@@ -2,7 +2,10 @@ package com.campersamu.itemcommander.mixin;
 
 import com.campersamu.itemcommander.exception.CommanderException;
 import com.campersamu.itemcommander.nbt.Commander;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.util.ActionResult;
@@ -27,8 +30,8 @@ public class ItemInteractMixin {
     )
     private void checkInteraction(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
         try {
-            if (stack.hasNbt()) {
-                cir.setReturnValue(Commander.fromNbt(Objects.requireNonNull(stack.getNbt())).executeCommand(player, stack, player.raycast(4, 1.0F, false).getPos()));
+            if (stack.get(DataComponentTypes.CUSTOM_DATA) != null) {
+                cir.setReturnValue(Commander.fromNbt(Objects.requireNonNull(stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt())).executeCommand(player, stack, player.raycast(4, 1.0F, false).getPos()));
             }
         } catch (CommanderException ignored) {
         }

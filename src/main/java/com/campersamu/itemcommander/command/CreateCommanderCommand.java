@@ -7,7 +7,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.ItemStackArgument;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -98,11 +101,11 @@ public class CreateCommanderCommand {
                 ctxSource.sendError(errorNoItemInHandText);
                 return -1;
             }
-            player.getMainHandStack().getOrCreateNbt()
+            player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt()
                     .put(COMMANDER_TAG_KEY, commander.toNbt());
         } else {
             final ItemStack stack = stackArg.createStack(1, true);
-            stack.getOrCreateNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
+            stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
             player.giveItemStack(stack);
         }
 
