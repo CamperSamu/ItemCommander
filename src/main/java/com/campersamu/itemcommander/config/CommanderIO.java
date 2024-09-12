@@ -1,6 +1,5 @@
 package com.campersamu.itemcommander.config;
 
-import com.mojang.datafixers.DataFixerUpper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -19,6 +18,7 @@ import static com.campersamu.itemcommander.ItemCommanderInit.LOGGER;
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+@SuppressWarnings("deprecation") // Suppress FabricLoader#getGameInstance warnings
 public interface CommanderIO {
     Path CONFIG_FOLDER = FabricLoader.getInstance().getConfigDir().resolve("commander");
 
