@@ -96,16 +96,20 @@ public class CreateCommanderCommand {
         final Commander commander = new Commander(command, action, source, cooldown);
 
 
+        final NbtComponent commanderNbt;
         if (stackArg == null) {
             if (player.getMainHandStack().isEmpty()) {
                 ctxSource.sendError(errorNoItemInHandText);
                 return -1;
             }
-            player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt()
-                    .put(COMMANDER_TAG_KEY, commander.toNbt());
+            commanderNbt = player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound()));
+            commanderNbt.getNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
+            player.getMainHandStack().set(DataComponentTypes.CUSTOM_DATA, commanderNbt);
         } else {
             final ItemStack stack = stackArg.createStack(1, true);
-            stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
+            commanderNbt = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound()));
+            commanderNbt.getNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
+            stack.set(DataComponentTypes.CUSTOM_DATA, commanderNbt);
             player.giveItemStack(stack);
         }
 

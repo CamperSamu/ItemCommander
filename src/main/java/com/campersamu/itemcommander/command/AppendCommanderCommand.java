@@ -53,8 +53,9 @@ public class AppendCommanderCommand {
 
         try {
             final Commander commander = Commander.fromNbt(player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt()).appendCommand(command);
-            player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound())).getNbt()
-                    .put(COMMANDER_TAG_KEY, commander.toNbt());
+            final NbtComponent commanderNbt = player.getMainHandStack().getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound()));
+            commanderNbt.getNbt().put(COMMANDER_TAG_KEY, commander.toNbt());
+            player.getMainHandStack().set(DataComponentTypes.CUSTOM_DATA, commanderNbt);
         } catch (CommanderException e) {
             ctxSource.sendError(errorNotCommanderItemText);
             return -1;
