@@ -19,10 +19,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static com.campersamu.itemcommander.ItemCommanderInit.PLACEHOLDERS_LOADED;
 import static com.campersamu.itemcommander.nbt.CommanderAction.CONSUME;
-import static com.campersamu.itemcommander.nbt.CommanderSource.SERVER;
 import static java.lang.Integer.max;
 
 /**
@@ -141,19 +141,14 @@ public record Commander(String[] commands, CommanderAction action, CommanderSour
     public static @NotNull Commander fromNbt(@NotNull NbtCompound nbt) throws CommanderException {
         if (nbt.contains(COMMANDER_TAG_KEY, NbtElement.COMPOUND_TYPE)) {
             nbt = nbt.getCompound(COMMANDER_TAG_KEY);
-            if (nbt.contains(COMMANDER_COMMAND_KEY, NbtElement.STRING_TYPE)) {
-                if (nbt.contains(COMMANDER_ACTION_KEY, NbtElement.BYTE_TYPE)) {
-                    if (nbt.contains(COMMANDER_SOURCE_KEY, NbtElement.BYTE_TYPE)) {
-                        if (nbt.contains(COMMANDER_COOLDOWN_KEY, NbtElement.INT_TYPE)) {
-                            return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)), max(0, nbt.getInt(COMMANDER_COOLDOWN_KEY)));
-                        }
-                        return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)), 0);
-                    }
-                    return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)), SERVER, 0);
-                }
-                return new Commander(nbt.getString(COMMANDER_COMMAND_KEY).split("[|]"), CONSUME, SERVER, 0);
-            }
-            throw CommanderNoCommandException;
+            return new Commander(
+                    Optional.of(nbt.getString(COMMANDER_COMMAND_KEY))
+                            .orElseThrow(() -> CommanderNoCommandException)
+                            .split("[|]"),
+                    CommanderAction.fromId(nbt.getByte(COMMANDER_ACTION_KEY)),
+                    CommanderSource.fromId(nbt.getByte(COMMANDER_SOURCE_KEY)),
+                    max(0, nbt.getInt(COMMANDER_COOLDOWN_KEY))
+            );
         }
         throw CommanderNoTagException;
     }
